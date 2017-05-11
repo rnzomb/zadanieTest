@@ -1,0 +1,36 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="mapperInterfaces.CallMapper">
+
+    <resultMap id="queryCallresult" type="Call">
+        <result property="recordId" column="record_id"/>
+        <result property="callId" column="call_id"/>
+        <result property="caller" column="caller"/>
+        <result property="receiver" column="receiver"/>
+        <result property="eventName" column="event_name"/>
+        <result property="recordDate" column="record_date"/>
+    </resultMap>
+
+    <select id="getAll" resultMap="queryCallresult">
+        SELECT t_call.*, event_name, record_date, call_id FROM t_call
+        JOIN t_event USING (record_id)
+        JOIN t_event_type ON t_event.record_event_id=t_event_type.event_id
+        GROUP BY record_id;
+    </select>
+
+
+    <select id="getCallById" parameterType="int" resultMap="queryCallresult">
+        SELECT caller, receiver, event_name, record_date, call_id FROM t_event
+        JOIN t_event_type ON t_event.record_event_id=t_event_type.EVENT_ID
+        JOIN t_call USING (record_id)
+        WHERE t_event.call_id = #{callId}
+        ORDER BY record_date ASC
+    </select>
+
+    <insert id='insertCall' parameterType='Call' useGeneratedKeys='true' keyProperty='recordId'>
+        INSERT INTO t_call (caller, receiver)
+        VALUES(#{caller}, #{receiver})
+    </insert>
+</mapper>
